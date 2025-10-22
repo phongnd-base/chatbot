@@ -29,9 +29,9 @@ export class SessionController {
     return this.sessions.update(req.user.userId, id, { isFavorite });
   }
 
-  @Patch(':id/group')
-  setGroup(@Req() req: any, @Param('id') id: string, @Body('groupId') groupId: string | null) {
-    return this.sessions.update(req.user.userId, id, { groupId });
+  @Patch(':id/folder')
+  setFolder(@Req() req: any, @Param('id') id: string, @Body('folderId') folderId: string | null) {
+    return this.sessions.update(req.user.userId, id, { folderId });
   }
 
   @Get(':id/export.json')

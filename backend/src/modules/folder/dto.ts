@@ -1,12 +1,12 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateGroupDto {
+export class CreateFolderDto {
   @IsString()
   @IsNotEmpty()
   name!: string;
 }
 
-export class UpdateGroupDto {
+export class UpdateFolderDto {
   @IsString()
   @IsOptional()
   name?: string;

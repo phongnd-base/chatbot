@@ -7,7 +7,7 @@ export class CreateSessionDto {
 
   @IsString()
   @IsOptional()
-  groupId?: string;
+  folderId?: string;
 
   @IsString()
   @IsOptional()
@@ -29,7 +29,7 @@ export class UpdateSessionDto {
 
   @IsString()
   @IsOptional()
-  groupId?: string | null;
+  folderId?: string | null;
 
   @IsString()
   @IsOptional()

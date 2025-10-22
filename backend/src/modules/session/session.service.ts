@@ -15,7 +15,7 @@ export class SessionService {
   }
 
   create(userId: string, dto: CreateSessionDto) {
-    return this.prisma.session.create({ data: { title: dto.title ?? 'New Chat', userId, groupId: dto.groupId ?? null, model: dto.model ?? 'gpt-3.5-turbo', provider: (dto.provider as any) ?? 'OPENAI' } });
+    return this.prisma.session.create({ data: { title: dto.title ?? 'New Chat', userId, folderId: dto.folderId ?? null, model: dto.model ?? 'gpt-3.5-turbo', provider: (dto.provider as any) ?? 'OPENAI' } });
   }
 
   async update(userId: string, id: string, dto: UpdateSessionDto) {
