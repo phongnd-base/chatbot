@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { ChatMessages } from "@/components/chat/ChatMessages";
 import { ChatInput } from "@/components/chat/ChatInput";
-import { useSessions, useMessages, useModels, useProviderModels, useChatStream } from "@/hooks";
+import { useSession, useMessages, useModels, useProviderModels, useChatStream } from "@/hooks";
 import type { Provider } from "@/lib/api";
 
 const PROVIDERS = [
@@ -21,7 +21,7 @@ export default function ChatSessionPage({
   const { sessionId } = params;
 
   // Hooks for data management
-  const { session, updateSession } = useSessions(sessionId);
+  const { session, updateSession } = useSession(sessionId); // Changed from useSessions
   const { messages, addMessage, updateMessage, replaceMessageId, refetch: refetchMessages } = useMessages(sessionId);
   const { modelsByProvider, loading: modelsLoading } = useModels();
 

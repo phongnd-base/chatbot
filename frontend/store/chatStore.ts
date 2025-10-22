@@ -10,10 +10,10 @@ import { create } from 'zustand';
 type ChatUIState = {
   // Active session for routing
   activeSessionId?: string;
-  setActive: (id: string) => void;
+  setActiveSessionId: (id: string | undefined) => void;
 };
 
 export const useChatStore = create<ChatUIState>((set) => ({
   activeSessionId: undefined,
-  setActive: (id) => set({ activeSessionId: id }),
+  setActiveSessionId: (id) => set({ activeSessionId: id }),
 }));

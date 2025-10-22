@@ -64,10 +64,13 @@ export function useSessions() {
     }
   }, [updateSessionInStore, setError]);
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount (chỉ nếu chưa có data)
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+    if (sessions.length === 0) {
+      fetchSessions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     sessions,

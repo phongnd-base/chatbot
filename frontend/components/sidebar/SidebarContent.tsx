@@ -15,7 +15,6 @@ export function SidebarContent() {
   // Data hooks
   const { folders } = useFolders();
   const { sessions } = useSessions();
-  console.log(sessions);
 
   // Get starred folders
   const starredFolders = folders.filter((f) => f.isFavorite);

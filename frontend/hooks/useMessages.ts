@@ -52,7 +52,8 @@ export function useMessages(sessionId: string) {
   // Auto-fetch on mount or when sessionId changes
   useEffect(() => {
     fetchMessages();
-  }, [fetchMessages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     messages,

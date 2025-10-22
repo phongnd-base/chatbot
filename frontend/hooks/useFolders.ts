@@ -75,10 +75,13 @@ export function useFolders() {
     }
   }, [updateFolderInStore, setError]);
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount (chỉ nếu chưa có data)
   useEffect(() => {
-    fetchFolders();
-  }, [fetchFolders]);
+    if (folders.length === 0) {
+      fetchFolders();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     folders,
