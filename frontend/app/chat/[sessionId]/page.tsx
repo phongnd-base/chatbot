@@ -158,7 +158,7 @@ export default function ChatSessionPage({ params }: { params: { sessionId: strin
 	}
 
 	return (
-		<div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950">
+		<div className="flex h-full w-full bg-zinc-50 dark:bg-zinc-950">
 			{/* Sidebar */}
 			<aside className="hidden md:flex md:w-64 flex-col border-r border-zinc-200 dark:border-zinc-800 p-4 gap-2">
 				<button onClick={newSession} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded px-3 py-2 text-sm">New Chat</button>

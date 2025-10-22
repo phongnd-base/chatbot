@@ -96,49 +96,51 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4">
-      <div className="w-full max-w-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 shadow-sm">
-        <h1 className="text-xl font-semibold mb-4">Sign in</h1>
-        <form onSubmit={submit} className="space-y-3">
-          <div>
-            <label className="block text-sm text-zinc-600 dark:text-zinc-300 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-zinc-600 dark:text-zinc-300 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
-              required
-            />
-          </div>
-          {error && <div className="text-sm text-red-600">{error}</div>}
+    <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4 py-8">
+      <div className="w-full max-w-sm space-y-4">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 shadow-sm">
+          <h1 className="text-xl font-semibold mb-4">Sign in</h1>
+          <form onSubmit={submit} className="space-y-3">
+            <div>
+              <label className="block text-sm text-zinc-600 dark:text-zinc-300 mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-zinc-600 dark:text-zinc-300 mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+            </div>
+            {error && <div className="text-sm text-red-600">{error}</div>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-md px-4 py-2"
+            >
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+          <div className="my-4 h-px bg-zinc-200 dark:bg-zinc-800" />
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-md px-4 py-2"
+            onClick={goGoogle}
+            className="w-full bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 rounded-md px-4 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800/80"
           >
-            {loading ? "Signing in…" : "Sign in"}
+            Continue with Google
           </button>
-        </form>
-        <div className="my-4 h-px bg-zinc-200 dark:bg-zinc-800" />
-        <button
-          onClick={goGoogle}
-          className="w-full bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 rounded-md px-4 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800/80"
-        >
-          Continue with Google
-        </button>
-      </div>
-      <div className="mt-4 text-sm text-zinc-600 dark:text-zinc-300">
-        New here? <a href="/register" className="text-emerald-600 hover:underline">Create an account</a>
+        </div>
+        <div className="text-center text-sm text-zinc-600 dark:text-zinc-300">
+          New here? <a href="/register" className="text-emerald-600 hover:underline">Create an account</a>
+        </div>
       </div>
     </div>
   );
