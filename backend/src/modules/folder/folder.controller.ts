@@ -28,6 +28,11 @@ export class FolderController {
     return this.folders.remove(req.user.userId, id);
   }
 
+  @Patch(':id/favorite')
+  toggleFavorite(@Req() req: any, @Param('id') id: string, @Body('isFavorite') isFavorite: boolean) {
+    return this.folders.update(req.user.userId, id, { isFavorite });
+  }
+
   @Get(':id/sessions')
   listSessions(@Req() req: any, @Param('id') id: string) {
     return this.folders.listSessions(req.user.userId, id);

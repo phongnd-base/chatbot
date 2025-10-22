@@ -15,19 +15,25 @@ export const messageService = {
   },
 
   /**
-   * Send a message and get streaming response
-   * Returns an EventSource for SSE streaming
+   * Send a message and stream the response
+   * Backend uses HTTP POST with NDJSON streaming (not SSE)
+   * Use this with fetch + ReadableStream to consume the stream
    */
-  createMessageStream(sessionId: string, prompt: string): EventSource {
-    // For streaming, we use EventSource directly
-    // The actual POST is handled by the streamMessage function
-    return new EventSource(`/api/bff/messages/stream/${sessionId}`);
-  },
+  async sendMessageStream(data: SendMessageRequest): Promise<Response> {
+    // Return raw Response for caller to handle streaming
+    const response = await fetch('/api/bff/messages/stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-  /**
-   * Send a message via POST (triggers streaming)
-   */
-  async sendMessage(data: SendMessageRequest): Promise<void> {
-    return apiClient.post<void>('messages/stream', data);
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Failed to send message');
+    }
+
+    return response;
   },
 };

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useSidebarStore } from "@/store/sidebarStore";
+import { useFolders, useSessions } from "@/hooks";
 import { FolderItem } from "./FolderItem";
 import { SessionListItem } from "./SessionListItem";
 import { useChatStore } from "@/store/chatStore";
@@ -9,9 +10,12 @@ import { Star, FolderOpen, MessageSquare } from "lucide-react";
 
 export function SidebarContent() {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed);
-  const folders = useSidebarStore((state) => state.folders);
-  const sessions = useSidebarStore((state) => state.sessions);
   const activeSessionId = useChatStore((state) => state.activeSessionId);
+  
+  // Data hooks
+  const { folders } = useFolders();
+  const { sessions } = useSessions();
+  console.log(sessions);
 
   // Get starred folders
   const starredFolders = folders.filter((f) => f.isFavorite);
@@ -54,7 +58,8 @@ export function SidebarContent() {
               return (
                 <FolderItem
                   key={folder.id}
-                  folder={{ ...folder, sessionCount: folderSessions.length }}
+                  folder={folder}
+                  sessionCount={folderSessions.length}
                   sessions={folderSessions}
                   activeSessionId={activeSessionId}
                 />
@@ -79,7 +84,8 @@ export function SidebarContent() {
               return (
                 <FolderItem
                   key={folder.id}
-                  folder={{ ...folder, sessionCount: folderSessions.length }}
+                  folder={folder}
+                  sessionCount={folderSessions.length}
                   sessions={folderSessions}
                   activeSessionId={activeSessionId}
                 />

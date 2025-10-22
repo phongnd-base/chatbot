@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useSidebarStore } from "@/store/sidebarStore";
+import { useFolders, useSessions } from "@/hooks";
 import { Plus, Menu, Folder } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,20 +11,30 @@ import { cn } from "@/lib/utils";
 export function SidebarHeader() {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed);
   const toggleSidebar = useSidebarStore((state) => state.toggleSidebar);
-  const createFolder = useSidebarStore((state) => state.createFolder);
+  const { createFolder } = useFolders();
+  const { createSession } = useSessions();
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const [folderName, setFolderName] = useState("");
   const router = useRouter();
 
-  const handleCreateNewChat = () => {
-    router.push("/chat/new");
+  const handleCreateNewChat = async () => {
+    try {
+      const session = await createSession({ title: "New Chat" });
+      router.push(`/chat/${session.id}`);
+    } catch (error) {
+      console.error('Failed to create session:', error);
+    }
   };
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = async () => {
     if (folderName.trim()) {
-      createFolder(folderName.trim());
-      setFolderName("");
-      setShowNewFolderInput(false);
+      try {
+        await createFolder({ name: folderName.trim() });
+        setFolderName("");
+        setShowNewFolderInput(false);
+      } catch (error) {
+        console.error('Failed to create folder:', error);
+      }
     }
   };
 

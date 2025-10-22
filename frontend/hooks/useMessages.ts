@@ -1,61 +1,68 @@
 /**
  * useMessages Hook
- * Manages message state and operations
+ * Điều phối logic và side effects cho messages
+ * Sử dụng Zustand store + Service API layer
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { messageService, type Message } from '@/lib/api';
+import { useMessageStore } from '@/store/messageStore';
 
 export function useMessages(sessionId: string) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  // Get state and actions from Zustand store
+  const { messagesBySession, loading, error, setMessages, addMessage: addMessageToStore, updateMessage: updateMessageInStore, replaceMessageId: replaceMessageIdInStore, setLoading, setError } = useMessageStore();
 
-  // Fetch messages
+  // Get messages for this specific session
+  const messages = messagesBySession[sessionId] || [];
+  const isLoading = loading[sessionId] || false;
+  const sessionError = error[sessionId] || null;
+
+  // Fetch messages for session
   const fetchMessages = useCallback(async () => {
+    if (!sessionId) return;
+
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(sessionId, true);
+      setError(sessionId, null);
       const data = await messageService.getMessages(sessionId);
-      setMessages(data);
+      setMessages(sessionId, data);
     } catch (err) {
-      setError(err as Error);
+      setError(sessionId, err as Error);
       console.error('Failed to fetch messages:', err);
     } finally {
-      setLoading(false);
+      setLoading(sessionId, false);
     }
-  }, [sessionId]);
+  }, [sessionId, setMessages, setLoading, setError]);
 
   // Add message optimistically
   const addMessage = useCallback((message: Message) => {
-    setMessages((prev) => [...prev, message]);
-  }, []);
+    addMessageToStore(sessionId, message);
+  }, [sessionId, addMessageToStore]);
 
   // Update message (for streaming)
   const updateMessage = useCallback((id: string, updates: Partial<Message>) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg))
-    );
-  }, []);
+    updateMessageInStore(sessionId, id, updates);
+  }, [sessionId, updateMessageInStore]);
 
   // Replace message ID (after server confirmation)
   const replaceMessageId = useCallback((oldId: string, newId: string) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === oldId ? { ...msg, id: newId } : msg))
-    );
-  }, []);
+    replaceMessageIdInStore(sessionId, oldId, newId);
+  }, [sessionId, replaceMessageIdInStore]);
 
+  // Auto-fetch on mount or when sessionId changes
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
   return {
     messages,
-    loading,
-    error,
+    loading: isLoading,
+    error: sessionError,
     addMessage,
     updateMessage,
     replaceMessageId,
     refetch: fetchMessages,
   };
 }
+
+

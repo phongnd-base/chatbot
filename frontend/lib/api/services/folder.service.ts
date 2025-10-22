@@ -4,72 +4,49 @@
  */
 
 import { apiClient } from '../client';
-
-export interface FolderData {
-  id: string;
-  name: string;
-  isFavorite?: boolean;
-}
+import type { Session, Folder, CreateFolderRequest, UpdateFolderRequest } from '../types';
 
 export const folderService = {
   /**
-   * Get all folders
+   * Get all folders for the current user
    */
-  async getFolders(): Promise<FolderData[]> {
-    // TODO: Implement when backend endpoint ready
-    // return apiClient.get<FolderData[]>('folders');
-    
-    // Temporary: return from localStorage
-    const stored = localStorage.getItem('sidebar-storage');
-    if (stored) {
-      const data = JSON.parse(stored);
-      return data.state?.folders || [];
-    }
-    return [];
+  async getFolders(): Promise<Folder[]> {
+    return apiClient.get<Folder[]>('folders');
   },
 
   /**
    * Create a new folder
    */
-  async createFolder(name: string): Promise<FolderData> {
-    // TODO: Implement when backend endpoint ready
-    // return apiClient.post<FolderData>('folders', { name });
-    
-    // Temporary: local only
-    return {
-      id: crypto.randomUUID(),
-      name,
-      isFavorite: false,
-    };
+  async createFolder(data: CreateFolderRequest): Promise<Folder> {
+    return apiClient.post<Folder>('folders', data);
   },
 
   /**
    * Update a folder
    */
-  async updateFolder(id: string, updates: Partial<FolderData>): Promise<FolderData> {
-    // TODO: Implement when backend endpoint ready
-    // return apiClient.patch<FolderData>(`folders/${id}`, updates);
-    
-    throw new Error('Not implemented: backend endpoint needed');
+  async updateFolder(id: string, data: UpdateFolderRequest): Promise<Folder> {
+    return apiClient.patch<Folder>(`folders/${id}`, data);
   },
 
   /**
    * Delete a folder
+   * Sessions in this folder will have their folderId set to null
    */
-  async deleteFolder(id: string): Promise<void> {
-    // TODO: Implement when backend endpoint ready
-    // return apiClient.delete<void>(`folders/${id}`);
-    
-    throw new Error('Not implemented: backend endpoint needed');
+  async deleteFolder(id: string): Promise<{ ok: boolean }> {
+    return apiClient.delete<{ ok: boolean }>(`folders/${id}`);
+  },
+
+  /**
+   * Get all sessions in a folder
+   */
+  async getFolderSessions(id: string): Promise<Session[]> {
+    return apiClient.get<Session[]>(`folders/${id}/sessions`);
   },
 
   /**
    * Toggle folder favorite status
    */
-  async toggleFavorite(id: string): Promise<FolderData> {
-    // TODO: Implement when backend endpoint ready
-    // return apiClient.patch<FolderData>(`folders/${id}/favorite`, {});
-    
-    throw new Error('Not implemented: backend endpoint needed');
+  async toggleFavorite(id: string, isFavorite: boolean): Promise<Folder> {
+    return apiClient.patch<Folder>(`folders/${id}/favorite`, { isFavorite });
   },
 };

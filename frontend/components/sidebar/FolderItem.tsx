@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { useSidebarStore } from "@/store/sidebarStore";
+import { useFolders } from "@/hooks";
 import { SessionListItem } from "./SessionListItem";
 import { ChevronDown, ChevronRight, Folder as FolderIcon, MoreVertical, Pencil, Trash2, Star } from "lucide-react";
-import type { SessionWithFolder, Folder } from "@/types";
+import type { Session, Folder } from "@/lib/api/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,29 +18,52 @@ import { cn } from "@/lib/utils";
 
 type FolderItemProps = {
   folder: Folder;
-  sessions: SessionWithFolder[];
+  sessionCount: number;
+  sessions: Session[];
   activeSessionId?: string;
 };
 
-export function FolderItem({ folder, sessions, activeSessionId }: FolderItemProps) {
+export function FolderItem({ 
+  folder, 
+  sessionCount, 
+  sessions, 
+  activeSessionId,
+}: FolderItemProps) {
+  const expandedFolders = useSidebarStore((state) => state.expandedFolders);
   const toggleFolder = useSidebarStore((state) => state.toggleFolder);
-  const deleteFolder = useSidebarStore((state) => state.deleteFolder);
-  const renameFolder = useSidebarStore((state) => state.renameFolder);
-  const toggleFolderFavorite = useSidebarStore((state) => state.toggleFolderFavorite);
+  const { updateFolder, deleteFolder, toggleFavorite } = useFolders();
   
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(folder.name);
 
-  const handleRename = () => {
+  const isExpanded = expandedFolders[folder.id] ?? false;
+
+  const handleRename = async () => {
     if (newName.trim() && newName !== folder.name) {
-      renameFolder(folder.id, newName.trim());
+      try {
+        await updateFolder(folder.id, { name: newName.trim() });
+      } catch (error) {
+        console.error('Failed to rename folder:', error);
+      }
     }
     setIsRenaming(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm(`Delete folder "${folder.name}"? Sessions will be moved to root.`)) {
-      deleteFolder(folder.id);
+      try {
+        await deleteFolder(folder.id);
+      } catch (error) {
+        console.error('Failed to delete folder:', error);
+      }
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    try {
+      await toggleFavorite(folder.id, !folder.isFavorite);
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
     }
   };
 
@@ -50,7 +74,7 @@ export function FolderItem({ folder, sessions, activeSessionId }: FolderItemProp
           onClick={() => toggleFolder(folder.id)}
           className="flex items-center gap-1.5 flex-1 min-w-0"
         >
-          {folder.isExpanded ? (
+          {isExpanded ? (
             <ChevronDown className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400 flex-shrink-0" />
           ) : (
             <ChevronRight className="w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
@@ -87,7 +111,7 @@ export function FolderItem({ folder, sessions, activeSessionId }: FolderItemProp
           )}
           
           <span className="text-[10px] text-neutral-500 dark:text-neutral-500 ml-auto">
-            ({folder.sessionCount})
+            ({sessionCount})
           </span>
         </button>
 
@@ -106,7 +130,7 @@ export function FolderItem({ folder, sessions, activeSessionId }: FolderItemProp
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
-            <DropdownMenuItem onClick={() => toggleFolderFavorite(folder.id)}>
+            <DropdownMenuItem onClick={handleToggleFavorite}>
               <Star className={`w-3.5 h-3.5 mr-2 ${folder.isFavorite ? 'fill-yellow-400 text-yellow-400' : ''}`} />
               <span>{folder.isFavorite ? 'Unstar' : 'Star'}</span>
             </DropdownMenuItem>
@@ -128,7 +152,7 @@ export function FolderItem({ folder, sessions, activeSessionId }: FolderItemProp
         </DropdownMenu>
       </div>
 
-      {folder.isExpanded && sessions.length > 0 && (
+      {isExpanded && sessions.length > 0 && (
         <div className="ml-5 mt-0.5 space-y-0.5">
           {sessions.map((session) => (
             <SessionListItem

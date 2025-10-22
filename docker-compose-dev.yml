@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chatbot
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    # No host port mapping to avoid conflicts; accessible to other services via network alias
+
+volumes:
+  db_data:

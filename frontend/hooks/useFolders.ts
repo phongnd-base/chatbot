@@ -1,18 +1,19 @@
 /**
  * useFolders Hook
- * Manages folder state with API integration
+ * Điều phối logic và side effects cho folders
+ * Sử dụng Zustand store + Service API layer
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { folderService } from '@/lib/api';
-import type { FolderData } from '@/lib/api/services/folder.service';
+import { useFolderStore } from '@/store/folderStore';
+import type { CreateFolderRequest, UpdateFolderRequest } from '@/lib/api/types';
 
 export function useFolders() {
-  const [folders, setFolders] = useState<FolderData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  // Get state and actions from Zustand store
+  const { folders, loading, error, setFolders, addFolder, updateFolder: updateFolderInStore, removeFolder, setLoading, setError } = useFolderStore();
 
-  // Fetch folders from API
+  // Fetch all folders
   const fetchFolders = useCallback(async () => {
     try {
       setLoading(true);
@@ -25,55 +26,56 @@ export function useFolders() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setFolders, setLoading, setError]);
 
   // Create folder
-  const createFolder = useCallback(async (name: string) => {
+  const createFolder = useCallback(async (data: CreateFolderRequest) => {
     try {
-      const newFolder = await folderService.createFolder(name);
-      setFolders((prev) => [...prev, newFolder]);
+      const newFolder = await folderService.createFolder(data);
+      addFolder(newFolder);
       return newFolder;
     } catch (err) {
       setError(err as Error);
       throw err;
     }
-  }, []);
+  }, [addFolder, setError]);
 
   // Update folder
-  const updateFolder = useCallback(async (id: string, updates: Partial<FolderData>) => {
+  const updateFolder = useCallback(async (id: string, updates: UpdateFolderRequest) => {
     try {
       const updated = await folderService.updateFolder(id, updates);
-      setFolders((prev) => prev.map((f) => (f.id === id ? updated : f)));
+      updateFolderInStore(id, updated);
       return updated;
     } catch (err) {
       setError(err as Error);
       throw err;
     }
-  }, []);
+  }, [updateFolderInStore, setError]);
 
   // Delete folder
   const deleteFolder = useCallback(async (id: string) => {
     try {
       await folderService.deleteFolder(id);
-      setFolders((prev) => prev.filter((f) => f.id !== id));
+      removeFolder(id);
     } catch (err) {
       setError(err as Error);
       throw err;
     }
-  }, []);
+  }, [removeFolder, setError]);
 
   // Toggle favorite
-  const toggleFavorite = useCallback(async (id: string) => {
+  const toggleFavorite = useCallback(async (id: string, isFavorite: boolean) => {
     try {
-      const updated = await folderService.toggleFavorite(id);
-      setFolders((prev) => prev.map((f) => (f.id === id ? updated : f)));
+      const updated = await folderService.toggleFavorite(id, isFavorite);
+      updateFolderInStore(id, updated);
       return updated;
     } catch (err) {
       setError(err as Error);
       throw err;
     }
-  }, []);
+  }, [updateFolderInStore, setError]);
 
+  // Auto-fetch on mount
   useEffect(() => {
     fetchFolders();
   }, [fetchFolders]);

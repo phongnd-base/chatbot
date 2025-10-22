@@ -2,9 +2,9 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useSidebarStore } from "@/store/sidebarStore";
+import { useFolders, useSessions } from "@/hooks";
 import { MoreVertical, Trash2, FolderInput } from "lucide-react";
-import type { SessionWithFolder } from "@/types";
+import type { Session, Folder } from "@/lib/api/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,31 +16,43 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { sessionService } from "@/lib/api";
 
 type SessionListItemProps = {
-  session: SessionWithFolder;
+  session: Session;
   isActive?: boolean;
   isCollapsed?: boolean;
 };
 
-export function SessionListItem({ session, isActive, isCollapsed }: SessionListItemProps) {
+export function SessionListItem({ 
+  session, 
+  isActive, 
+  isCollapsed,
+}: SessionListItemProps) {
   const router = useRouter();
-  const deleteSession = useSidebarStore((state) => state.deleteSession);
-  const moveSessionToFolder = useSidebarStore((state) => state.moveSessionToFolder);
-  const folders = useSidebarStore((state) => state.folders);
+  const { folders } = useFolders();
+  const { deleteSession, updateSession } = useSessions();
 
   const handleClick = () => {
     router.push(`/chat/${session.id}`);
   };
 
-  const handleDelete = () => {
-    if (confirm(`Delete chat "${session.name}"?`)) {
-      deleteSession(session.id);
+  const handleDelete = async () => {
+    if (confirm(`Delete chat "${session.title}"?`)) {
+      try {
+        await deleteSession(session.id);
+      } catch (error) {
+        console.error('Failed to delete session:', error);
+      }
     }
   };
 
-  const handleMoveToFolder = (folderId: string | null) => {
-    moveSessionToFolder(session.id, folderId);
+  const handleMoveToFolder = async (folderId: string | null) => {
+    try {
+      await updateSession(session.id, { folderId });
+    } catch (error) {
+      console.error('Failed to move session:', error);
+    }
   };
 
   if (isCollapsed) {
@@ -56,7 +68,7 @@ export function SessionListItem({ session, isActive, isCollapsed }: SessionListI
                 : "hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
             }
           `}
-          title={session.name}
+          title={session.title}
         >
           <span className="text-base">💬</span>
         </button>
@@ -79,7 +91,7 @@ export function SessionListItem({ session, isActive, isCollapsed }: SessionListI
       >
         <span className="text-sm flex-shrink-0">💬</span>
         <span className="text-xs text-neutral-600 dark:text-neutral-400 truncate flex-1 text-left">
-          {session.name || "Untitled Chat"}
+          {session.title || "Untitled Chat"}
         </span>
         
         <DropdownMenu>
@@ -102,7 +114,7 @@ export function SessionListItem({ session, isActive, isCollapsed }: SessionListI
                 <DropdownMenuItem onClick={() => handleMoveToFolder(null)}>
                   <span>📁 Root</span>
                 </DropdownMenuItem>
-                {folders.map((folder) => (
+                {folders.map((folder: Folder) => (
                   <DropdownMenuItem
                     key={folder.id}
                     onClick={() => handleMoveToFolder(folder.id)}
