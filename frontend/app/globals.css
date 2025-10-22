@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@source "../node_modules/streamdown/dist/index.js";
+
+html, body, #__next {
+	height: 100%;
+}
+
+/* Light/Dark base backgrounds */
+body { @apply bg-zinc-50 text-zinc-900; }
+.dark body { @apply bg-zinc-950 text-zinc-100; }
+
+/* Prose tweaks */
+.prose pre { @apply bg-zinc-900 text-zinc-100 rounded-lg p-4 overflow-x-auto; }
+.prose code { @apply bg-zinc-800 text-zinc-100 rounded px-1 py-0.5; }
+
+html, body, #__next { height: 100%; }

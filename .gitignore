@@ -1,0 +1,16 @@
+node_modules
+dist
+.next
+.env
+*.log
+coverage
+.DS_Store
+.vscode/
+*.local
+*.cache
+backend/dist
+frontend/.next
+backend/node_modules
+frontend/node_modules
+docker-data/
+tmp/

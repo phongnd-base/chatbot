@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String?
+  sessions  Session[]
+  groups    Group[]
+  accounts  Account[]
+  createdAt DateTime  @default(now())
+}
+
+model Group {
+  id        String    @id @default(uuid())
+  name      String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  sessions  Session[]
+  createdAt DateTime  @default(now())
+}
+
+model Session {
+  id         String    @id @default(uuid())
+  title      String
+  model      String    @default("gpt-3.5-turbo")
+  provider   Provider  @default(OPENAI)
+  groupId    String?
+  group      Group?    @relation(fields: [groupId], references: [id])
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  isFavorite Boolean   @default(false)
+  messages   Message[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Message {
+  id        String    @id @default(uuid())
+  sessionId String
+  session   Session   @relation(fields: [sessionId], references: [id])
+  role      String
+  content   String
+  createdAt DateTime  @default(now())
+}
+
+model Account {
+  id                 String   @id @default(uuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id])
+  provider           String
+  providerAccountId  String
+  accessToken        String?
+  refreshToken       String?
+  expiresAt          DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+}
+
+enum Provider {
+  OPENAI
+  GOOGLE
+  ANTHROPIC
+}
