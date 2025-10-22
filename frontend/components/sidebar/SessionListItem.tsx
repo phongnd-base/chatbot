@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebarStore";
 import { MoreVertical, Trash2, FolderInput } from "lucide-react";
-import type { SessionWithFolder } from "@/store/sidebarStore";
+import type { SessionWithFolder } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,

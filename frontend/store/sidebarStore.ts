@@ -1,111 +1,56 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type Folder = {
+/**
+ * Sidebar UI State Store
+ * 
+ * ⚠️ IMPORTANT: This store only manages UI state (collapsed, expanded)
+ * Data (folders, sessions) should be managed by hooks that sync with API
+ */
+
+type FolderUIState = {
   id: string;
-  name: string;
   isExpanded: boolean;
-  sessionCount: number;
-  isFavorite?: boolean;
 };
 
-export type SessionWithFolder = {
-  id: string;
-  name: string;
-  folderId?: string | null;
-};
-
-type SidebarState = {
+type SidebarUIState = {
+  // UI State only
   isCollapsed: boolean;
-  folders: Folder[];
-  sessions: SessionWithFolder[];
+  expandedFolders: Record<string, boolean>; // folderId -> isExpanded
   
-  // Actions
+  // Actions for UI state
   toggleSidebar: () => void;
   toggleFolder: (folderId: string) => void;
-  createFolder: (name: string) => void;
-  deleteFolder: (folderId: string) => void;
-  renameFolder: (folderId: string, newName: string) => void;
-  toggleFolderFavorite: (folderId: string) => void;
-  
-  moveSessionToFolder: (sessionId: string, folderId: string | null) => void;
-  setSessions: (sessions: SessionWithFolder[]) => void;
-  addSession: (session: SessionWithFolder) => void;
-  deleteSession: (sessionId: string) => void;
+  setFolderExpanded: (folderId: string, expanded: boolean) => void;
 };
 
-export const useSidebarStore = create<SidebarState>()(
+export const useSidebarStore = create<SidebarUIState>()(
   persist(
     (set) => ({
       isCollapsed: false,
-      folders: [],
-      sessions: [],
+      expandedFolders: {},
 
-      toggleSidebar: () => set((state) => ({ isCollapsed: !state.isCollapsed })),
+      toggleSidebar: () => 
+        set((state) => ({ isCollapsed: !state.isCollapsed })),
 
       toggleFolder: (folderId) =>
         set((state) => ({
-          folders: state.folders.map((f) =>
-            f.id === folderId ? { ...f, isExpanded: !f.isExpanded } : f
-          ),
+          expandedFolders: {
+            ...state.expandedFolders,
+            [folderId]: !state.expandedFolders[folderId],
+          },
         })),
 
-      createFolder: (name) =>
+      setFolderExpanded: (folderId, expanded) =>
         set((state) => ({
-          folders: [
-            ...state.folders,
-            {
-              id: crypto.randomUUID(),
-              name,
-              isExpanded: true,
-              sessionCount: 0,
-            },
-          ],
-        })),
-
-      deleteFolder: (folderId) =>
-        set((state) => ({
-          folders: state.folders.filter((f) => f.id !== folderId),
-          sessions: state.sessions.map((s) =>
-            s.folderId === folderId ? { ...s, folderId: null } : s
-          ),
-        })),
-
-      renameFolder: (folderId, newName) =>
-        set((state) => ({
-          folders: state.folders.map((f) =>
-            f.id === folderId ? { ...f, name: newName } : f
-          ),
-        })),
-
-      toggleFolderFavorite: (folderId) =>
-        set((state) => ({
-          folders: state.folders.map((f) =>
-            f.id === folderId ? { ...f, isFavorite: !f.isFavorite } : f
-          ),
-        })),
-
-      moveSessionToFolder: (sessionId, folderId) =>
-        set((state) => ({
-          sessions: state.sessions.map((s) =>
-            s.id === sessionId ? { ...s, folderId } : s
-          ),
-        })),
-
-      setSessions: (sessions) => set({ sessions }),
-
-      addSession: (session) =>
-        set((state) => ({
-          sessions: [session, ...state.sessions],
-        })),
-
-      deleteSession: (sessionId) =>
-        set((state) => ({
-          sessions: state.sessions.filter((s) => s.id !== sessionId),
+          expandedFolders: {
+            ...state.expandedFolders,
+            [folderId]: expanded,
+          },
         })),
     }),
     {
-      name: 'sidebar-storage',
+      name: 'sidebar-ui-state',
     }
   )
 );

@@ -1,8 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+import { authService, sessionService } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,26 +15,20 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "Registration failed");
+      // Register
+      await authService.register({ email, password });
+      
+      // Auto-login after registration
+      const tokens = await authService.login({ email, password });
+      await authService.setTokens(tokens);
+      
+      // Create first session and redirect
+      try {
+        const newSession = await sessionService.createSession({ title: "New Chat" });
+        window.location.href = `/chat/${newSession.id}`;
+      } catch {
+        router.replace("/");
       }
-      // After successful registration, auto-login
-      const loginRes = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!loginRes.ok) throw new Error("Auto login failed");
-      const tokens = await loginRes.json();
-      localStorage.setItem("accessToken", tokens.accessToken);
-      localStorage.setItem("refreshToken", tokens.refreshToken);
-      router.replace("/");
     } catch (err: any) {
       setError(err.message || "Registration failed");
     } finally {

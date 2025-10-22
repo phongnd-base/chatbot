@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSidebarStore, Folder } from "@/store/sidebarStore";
+import { useSidebarStore } from "@/store/sidebarStore";
 import { SessionListItem } from "./SessionListItem";
 import { ChevronDown, ChevronRight, Folder as FolderIcon, MoreVertical, Pencil, Trash2, Star } from "lucide-react";
-import type { SessionWithFolder } from "@/store/sidebarStore";
+import type { SessionWithFolder, Folder } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,

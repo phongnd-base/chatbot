@@ -20,10 +20,11 @@ export function middleware(req: NextRequest) {
     if (!token) {
       const url = req.nextUrl.clone();
       url.pathname = '/login';
-      url.search = `from=${encodeURIComponent(pathname + search)}`;
+      url.search = `from=${encodeURIComponent(pathname + search)}&expired=1`;
       if (debug) {
         return new Response(`Blocked by middleware\npath=${pathname}\nisProtected=true\nhasToken=false\nredirectTo=${url.pathname + url.search}`, { status: 401, headers: { 'content-type': 'text/plain' } });
       }
+      console.log('[Middleware] No token found, redirecting to login:', url.pathname + url.search);
       return NextResponse.redirect(url);
     }
   }

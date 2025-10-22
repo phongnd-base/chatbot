@@ -1,8 +1,7 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+import { authService, sessionService } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,35 +10,35 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  // Check if session expired
+  useEffect(() => {
+    if (sp.get("expired") === "1") {
+      setSessionExpired(true);
+      setError("Your session has expired. Please login again.");
+    }
+  }, [sp]);
 
   // If redirected back with tokens (e.g., Google OAuth), set httpOnly cookies and bounce
   useEffect(() => {
     const at = sp.get("accessToken");
     const rt = sp.get("refreshToken");
     if (at) {
-      fetch("/api/auth/set-tokens", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken: at, refreshToken: rt || undefined }),
+      authService.setTokens({ 
+        accessToken: at, 
+        refreshToken: rt || undefined 
       }).finally(async () => {
         const from = sp.get("from");
         if (from && from.startsWith("/")) {
-          // Hard navigation to ensure cookie is sent and middleware sees it
           window.location.href = from;
           return;
         }
         // No `from`: create a new session and go to chat
         try {
-          const res = await fetch(`/api/bff/sessions`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: "New Chat" }),
-          });
-          if (res.ok) {
-            const json = await res.json();
-            window.location.href = `/chat/${json.id}`;
-            return;
-          }
+          const newSession = await sessionService.createSession({ title: "New Chat" });
+          window.location.href = `/chat/${newSession.id}`;
+          return;
         } catch {}
         // Fallback
         window.location.href = "/";
@@ -52,34 +51,18 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) throw new Error("Invalid credentials");
-      const json = await res.json();
-      await fetch("/api/auth/set-tokens", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken: json.accessToken, refreshToken: json.refreshToken }),
-      });
+      const tokens = await authService.login({ email, password });
+      await authService.setTokens(tokens);
+      
       const from = sp.get("from");
       if (from && from.startsWith("/")) {
         window.location.href = from;
       } else {
         // No `from`: create a new session and go to chat
         try {
-          const rs = await fetch(`/api/bff/sessions`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: "New Chat" }),
-          });
-          if (rs.ok) {
-            const j = await rs.json();
-            window.location.href = `/chat/${j.id}`;
-            return;
-          }
+          const newSession = await sessionService.createSession({ title: "New Chat" });
+          window.location.href = `/chat/${newSession.id}`;
+          return;
         } catch {}
         router.replace("/");
       }
@@ -91,13 +74,27 @@ export default function LoginPage() {
   }
 
   function goGoogle() {
-    // Simple redirect to backend Google OAuth endpoint
-    window.location.href = `${API_BASE}/auth/google`;
+    window.location.href = authService.getGoogleAuthUrl();
   }
 
   return (
     <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4 py-8">
       <div className="w-full max-w-sm space-y-4">
+        {sessionExpired && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                Session Expired
+              </p>
+            </div>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+              Your session has expired. Please login again to continue.
+            </p>
+          </div>
+        )}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 shadow-sm">
           <h1 className="text-xl font-semibold mb-4">Sign in</h1>
           <form onSubmit={submit} className="space-y-3">
