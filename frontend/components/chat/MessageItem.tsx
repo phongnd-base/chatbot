@@ -1,23 +1,49 @@
 "use client";
+
 import React from "react";
-import { Streamdown } from 'streamdown';
-import clsx from "clsx";
+import { User, Bot } from "lucide-react";
 
-export type Message = { id: string; role: "user" | "assistant"; content: string };
+type MessageItemProps = {
+  message: {
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+  };
+};
 
-export function MessageItem({ message }: { message: Message }) {
+export function MessageItem({ message }: MessageItemProps) {
+  const isUser = message.role === "user";
+
   return (
-    <div
-      className={clsx(
-        "rounded-lg px-4 py-3",
-        message.role === "user"
-          ? "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
-          : "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40"
-      )}
-    >
-      <div className="text-xs uppercase tracking-wide mb-1 text-zinc-500">{message.role}</div>
-      <div className="prose prose-zinc dark:prose-invert max-w-none">
-		<Streamdown>{message.content || ""}</Streamdown>
+    <div className={`flex gap-4 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+      {/* Avatar */}
+      <div
+        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+          isUser
+            ? "bg-gradient-to-br from-purple-500 to-pink-500"
+            : "bg-gradient-to-br from-emerald-500 to-teal-500"
+        }`}
+      >
+        {isUser ? (
+          <User className="w-5 h-5 text-white" />
+        ) : (
+          <Bot className="w-5 h-5 text-white" />
+        )}
+      </div>
+
+      {/* Message Content */}
+      <div className={`flex-1 max-w-[80%] ${isUser ? "text-right" : "text-left"}`}>
+        <div
+          className={`inline-block px-4 py-3 rounded-2xl ${
+            isUser
+              ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white"
+              : "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+          }`}
+        >
+          <div className="text-sm whitespace-pre-wrap break-words">
+            {message.content}
+          </div>
+        </div>
       </div>
     </div>
   );

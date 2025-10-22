@@ -35,8 +35,23 @@ export function SidebarHeader() {
           size="icon"
           onClick={toggleSidebar}
           title="Expand sidebar"
+          className="relative"
         >
-          <Menu className="w-5 h-5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 rounded-lg opacity-10" />
+          <svg
+            className="w-5 h-5 text-purple-600 dark:text-purple-400 relative z-10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <path d="M8 10h.01" />
+            <path d="M12 10h.01" />
+            <path d="M16 10h.01" />
+          </svg>
         </Button>
         <Button
           size="icon"
@@ -53,11 +68,31 @@ export function SidebarHeader() {
   return (
     <div className="p-3 border-b border-neutral-200 dark:border-neutral-800 space-y-2">
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">🤖</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <svg
+              className="w-5 h-5 text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              <path d="M8 10h.01" />
+              <path d="M12 10h.01" />
+              <path d="M16 10h.01" />
+            </svg>
           </div>
-          <span className="text-neutral-900 dark:text-white font-semibold">Voice Bot</span>
+          <div>
+            <h1 className="text-neutral-900 dark:text-white font-bold text-base leading-none">
+              AI Assistant
+            </h1>
+            <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+              Powered by AI
+            </p>
+          </div>
         </div>
         <Button
           variant="ghost"
